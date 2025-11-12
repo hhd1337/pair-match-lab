@@ -1,11 +1,14 @@
+# === Project docs ===
 HELP.md
+
+# === Gradle ===
 .gradle
 build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
 
-### STS ###
+# === STS ===
 .apt_generated
 .classpath
 .factorypath
@@ -17,7 +20,7 @@ bin/
 !**/src/main/**/bin/
 !**/src/test/**/bin/
 
-### IntelliJ IDEA ###
+# === IntelliJ IDEA ===
 .idea
 *.iws
 *.iml
@@ -26,12 +29,36 @@ out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 
-### NetBeans ###
+# === NetBeans ===
 /nbproject/private/
 /nbbuild/
 /dist/
 /nbdist/
 /.nb-gradle/
 
-### VS Code ###
+# === VS Code ===
 .vscode/
+
+# === Generic Java artifacts ===
+# Compiled classes & logs
+*.class
+*.log
+
+# BlueJ
+*.ctxt
+
+# J2ME
+.mtj.tmp/
+
+# Packaged/built archives
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# JVM crash logs
+hs_err_pid*
+replay_pid*
