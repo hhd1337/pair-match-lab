@@ -14,7 +14,7 @@ import lombok.Getter;
 public class ApiResponse<T> {
 
     @JsonProperty("isSuccess")
-    private boolean isSuccess;
+    private Boolean isSuccess;
     private String code;
     private String message;
     @JsonInclude(JsonInclude.Include.NON_NULL)
