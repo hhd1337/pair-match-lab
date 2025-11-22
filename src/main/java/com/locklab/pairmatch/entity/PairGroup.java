@@ -35,7 +35,11 @@ public class PairGroup extends BaseEntity {
     private Mission mission;
 
     @OneToMany(mappedBy = "pairGroup", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<PairMember> members = new ArrayList<>();
 
+    public void addMember(PairMember pairMember) {
+        this.members.add(pairMember);
+    }
 }
 

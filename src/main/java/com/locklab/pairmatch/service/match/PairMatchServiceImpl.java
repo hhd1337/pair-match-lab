@@ -86,6 +86,7 @@ public class PairMatchServiceImpl implements PairMatchService {
                     .crew(crew)
                     .build();
             pairMemberRepository.save(pairMember);
+            pairGroup.addMember(pairMember);
 
             crew.markMatched();
         }
