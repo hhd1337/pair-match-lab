@@ -40,5 +40,8 @@ public class Crew extends BaseEntity {
     @OneToMany(mappedBy = "crew2")
     private List<PairHistory> historiesAsCrew2 = new ArrayList<>();
 
+    public void markMatched() {
+        this.matched = true;
+    }
 }
 
