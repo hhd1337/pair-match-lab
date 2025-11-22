@@ -16,7 +16,13 @@ public enum ErrorStatus implements BaseErrorStatus {
     _NOT_FOUND(HttpStatus.NOT_FOUND, "COMMON404", "해당 리소스를 찾을 수 없습니다."),
 
     // For test
-    TEMP_EXCEPTION(HttpStatus.BAD_REQUEST, "TEMP4001", "테스트용 에러메세지입니다.");
+    TEMP_EXCEPTION(HttpStatus.BAD_REQUEST, "TEMP4001", "테스트용 에러메세지입니다."),
+
+    // 미션 관련 에러
+    MISSION_NOT_FOUND(HttpStatus.NOT_FOUND, "MISSION4041", "요청하신 미션을 찾을 수 없습니다."),
+
+    // 매칭 관련 에러
+    MATCH_NOT_ENOUGH_CREW(HttpStatus.BAD_REQUEST, "MATCH4001", "매칭을 수행하기 위한 크루 수가 2명 미만입니다.");
 
     private final HttpStatus httpStatus;
     private final String code;
