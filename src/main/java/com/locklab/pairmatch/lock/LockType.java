@@ -2,7 +2,8 @@ package com.locklab.pairmatch.lock;
 
 public enum LockType {
     NONE,
-    LOCAL,
-    DB,
+    JAVA_LOCAL,
+    DB_PESSIMISTIC,
+    MYSQL_NAMED,
     REDIS
 }
