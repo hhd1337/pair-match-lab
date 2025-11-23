@@ -16,9 +16,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -37,6 +39,8 @@ public class PairMatchServiceImpl implements PairMatchService {
 
         List<Crew> candidates = new ArrayList<>(crewRepository.findAllByMatchedFalse());
         if (candidates.size() < 2) {
+            log.warn("[PAIR_MATCH] missionId={} 매칭 실패 - 남은 후보자 수 부족 (remainingCandidates={})", missionId,
+                    candidates.size());
             throw new GeneralException(ErrorStatus.MATCH_NOT_ENOUGH_CREW);
         }
 
@@ -58,7 +62,7 @@ public class PairMatchServiceImpl implements PairMatchService {
 
             List<Crew> groupCrews = candidates.subList(index, index + groupSize);
 
-            // 🔍 이 레벨에서 과거에 이미 만난 조합이 하나라도 있으면 에러
+            // 이 레벨에서 과거에 이미 만난 조합이 하나라도 있으면 에러
             if (hasAnyPreviousPairingInLevel(mission.getLevel(), groupCrews)) {
                 throw new GeneralException(ErrorStatus.MATCH_DUPLICATED_PAIR_HISTORY);
             }
