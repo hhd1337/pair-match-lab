@@ -40,6 +40,13 @@ public class PairMatchServiceImpl implements PairMatchService {
             throw new GeneralException(ErrorStatus.MATCH_NOT_ENOUGH_CREW);
         }
 
+        // 👇 레이스 컨디션 확인용 인위적 지연
+        try {
+            Thread.sleep(3000); // 3초
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
         Collections.shuffle(candidates);
 
         List<PairGroup> createdGroups = new ArrayList<>();
