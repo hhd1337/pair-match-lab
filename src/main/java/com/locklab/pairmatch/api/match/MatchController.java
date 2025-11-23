@@ -5,7 +5,7 @@ import com.locklab.pairmatch.api.match.dto.MatchResponseDTO;
 import com.locklab.pairmatch.common.response.ApiResponse;
 import com.locklab.pairmatch.lock.LockType;
 import com.locklab.pairmatch.lock.LockingStrategy;
-import com.locklab.pairmatch.lock.LockingStrategyRouter;
+import com.locklab.pairmatch.lock.LockingStrategyFactory;
 import com.locklab.pairmatch.service.match.MatchResult;
 import com.locklab.pairmatch.service.match.PairMatchService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class MatchController {
 
     private final PairMatchService pairMatchService;
-    private final LockingStrategyRouter lockingStrategyRouter;
+    private final LockingStrategyFactory lockingStrategyFactory;
 
 
     @Operation(
@@ -41,7 +41,7 @@ public class MatchController {
             @PathVariable("missionId") @Positive Long missionId,
             @RequestParam(name = "lock", required = false, defaultValue = "NONE") LockType lockType
     ) {
-        LockingStrategy strategy = lockingStrategyRouter.resolve(lockType);
+        LockingStrategy strategy = lockingStrategyFactory.resolve(lockType);
 
         MatchResult matchResult = strategy.match(missionId);
 

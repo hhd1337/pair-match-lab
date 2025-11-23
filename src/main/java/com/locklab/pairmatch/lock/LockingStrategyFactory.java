@@ -5,12 +5,13 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class LockingStrategyRouter {
+public class LockingStrategyFactory {
 
     private final NoneLockingStrategy noneLockingStrategy;
     private final LocalLockingStrategy localLockingStrategy;
     private final DbLockingStrategy dbLockingStrategy;
     private final RedisLockingStrategy redisLockingStrategy;
+    private final NamedLockingStrategy namedLockingStrategy;
 
     public LockingStrategy resolve(LockType lockType) {
         if (lockType == null) {
@@ -19,8 +20,9 @@ public class LockingStrategyRouter {
 
         return switch (lockType) {
             case NONE -> noneLockingStrategy;
-            case LOCAL -> localLockingStrategy;
-            case DB -> dbLockingStrategy;
+            case JAVA_LOCAL -> localLockingStrategy;
+            case DB_PESSIMISTIC -> dbLockingStrategy;
+            case MYSQL_NAMED -> namedLockingStrategy;
             case REDIS -> redisLockingStrategy;
         };
     }
