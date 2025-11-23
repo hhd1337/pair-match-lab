@@ -24,8 +24,11 @@ public enum ErrorStatus implements BaseErrorStatus {
     // 매칭 관련 에러
     MATCH_NOT_ENOUGH_CREW(HttpStatus.BAD_REQUEST, "MATCH4001", "매칭을 수행하기 위한 크루 수가 2명 미만입니다."),
     MATCH_DUPLICATED_PAIR_HISTORY(HttpStatus.CONFLICT, "MATCH4091", "해당 레벨에서 이미 페어로 매칭된 이력이 있는 조합이 포함되어 있습니다."),
-    MATCH_LOCK_ACQUIRE_FAILED(HttpStatus.CONFLICT, "MATCH4091", "매칭을 위한 락을 획득하지 못했습니다.");
+    MATCH_LOCK_ACQUIRE_FAILED(HttpStatus.CONFLICT, "MATCH4091", "매칭을 위한 락을 획득하지 못했습니다."),
 
+    // 락 관련 에러 (Redis, NamedLock 등 공통)
+    LOCK_TIMEOUT(HttpStatus.REQUEST_TIMEOUT, "LOCK4081", "락 획득 시간이 초과되었습니다."),
+    LOCK_INTERRUPTED(HttpStatus.INTERNAL_SERVER_ERROR, "LOCK5001", "락 획득 대기 중 인터럽트가 발생했습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;
