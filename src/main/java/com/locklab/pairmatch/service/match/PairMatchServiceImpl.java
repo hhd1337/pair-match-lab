@@ -40,7 +40,7 @@ public class PairMatchServiceImpl implements PairMatchService {
             throw new GeneralException(ErrorStatus.MATCH_NOT_ENOUGH_CREW);
         }
 
-        // 👇 레이스 컨디션 확인용 인위적 지연
+        // 레이스 컨디션 확인용 인위적 지연
         try {
             Thread.sleep(3000); // 3초
         } catch (InterruptedException e) {
@@ -57,6 +57,11 @@ public class PairMatchServiceImpl implements PairMatchService {
             int groupSize = decideGroupMemberNum(remaining);
 
             List<Crew> groupCrews = candidates.subList(index, index + groupSize);
+
+            // 🔍 이 레벨에서 과거에 이미 만난 조합이 하나라도 있으면 에러
+            if (hasAnyPreviousPairingInLevel(mission.getLevel(), groupCrews)) {
+                throw new GeneralException(ErrorStatus.MATCH_DUPLICATED_PAIR_HISTORY);
+            }
 
             PairGroup pairGroup = createPairGroup(mission);
             savePairMembers(pairGroup, groupCrews);
@@ -126,4 +131,14 @@ public class PairMatchServiceImpl implements PairMatchService {
 
         pairHistoryRepository.saveAll(histories);
     }
+
+    private boolean hasAnyPreviousPairingInLevel(Integer level, List<Crew> groupCrews) {
+        List<Long> crewIds = groupCrews.stream()
+                .map(Crew::getId)
+                .toList();
+
+        return pairHistoryRepository
+                .existsByLevelAndCrew1IdInAndCrew2IdIn(level, crewIds, crewIds);
+    }
+
 }

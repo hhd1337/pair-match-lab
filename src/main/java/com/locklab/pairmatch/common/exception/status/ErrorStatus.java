@@ -22,7 +22,9 @@ public enum ErrorStatus implements BaseErrorStatus {
     MISSION_NOT_FOUND(HttpStatus.NOT_FOUND, "MISSION4041", "요청하신 미션을 찾을 수 없습니다."),
 
     // 매칭 관련 에러
-    MATCH_NOT_ENOUGH_CREW(HttpStatus.BAD_REQUEST, "MATCH4001", "매칭을 수행하기 위한 크루 수가 2명 미만입니다.");
+    MATCH_NOT_ENOUGH_CREW(HttpStatus.BAD_REQUEST, "MATCH4001", "매칭을 수행하기 위한 크루 수가 2명 미만입니다."),
+    MATCH_DUPLICATED_PAIR_HISTORY(HttpStatus.CONFLICT, "MATCH4091", "해당 레벨에서 이미 페어로 매칭된 이력이 있는 조합이 포함되어 있습니다.");
+
 
     private final HttpStatus httpStatus;
     private final String code;
