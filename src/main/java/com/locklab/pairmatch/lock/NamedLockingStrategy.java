@@ -6,9 +6,11 @@ import com.locklab.pairmatch.repository.NamedLockRepository;
 import com.locklab.pairmatch.service.match.MatchResult;
 import com.locklab.pairmatch.service.match.PairMatchService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class NamedLockingStrategy implements LockingStrategy {
@@ -21,28 +23,37 @@ public class NamedLockingStrategy implements LockingStrategy {
     @Override
     @Transactional
     public MatchResult match(Long missionId) {
-        String lockName = "pair-match-mission-" + missionId; // missionId 별 다른 락 이름 사용
+        String lockName = "pair-match-mission-" + missionId;
 
-        System.out.println("[NamedLock] 락 획득 시도 - " + lockName + " / " + Thread.currentThread().getName());
+        log.info("[NamedLock] [TRY] 락 획득 시도 - name={} thread={}", lockName, Thread.currentThread().getName());
 
         boolean acquired = namedLockRepository.acquireLock(lockName, LOCK_TIMEOUT_SECONDS);
+
         if (!acquired) {
+            log.warn("[NamedLock] [FAIL] 락 획득 실패 - name={} thread={}", lockName, Thread.currentThread().getName());
             throw new GeneralException(ErrorStatus.MATCH_LOCK_ACQUIRE_FAILED);
         }
 
-        try { // 네임드락 으로 보호되는 임계 영역
+        log.info("[NamedLock] [SUCCESS] 락 획득 - name={} thread={}", lockName, Thread.currentThread().getName());
 
-            System.out.println("[NamedLock] 락 획득 성공 - " + lockName + " / " + Thread.currentThread().getName());
-            // 테스트용 딜레이 (락 오래 잡고 있도록)
+        try {
+            log.debug("[NamedLock] [HOLD] 임계구역 실행 준비 (3초 대기) - name={}", lockName);
             Thread.sleep(3000);
 
             return pairMatchService.match(missionId);
+
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            log.error("[NamedLock] [INTERRUPTED] name={} error={}", lockName, e.getMessage());
             throw new RuntimeException(e);
+
         } finally {
+            log.info("[NamedLock] [RELEASE] 락 해제 시도 - name={} thread={}", lockName, Thread.currentThread().getName());
+
             namedLockRepository.releaseLock(lockName);
-            System.out.println("[NamedLock] 락 해제 완료 - " + lockName + " / " + Thread.currentThread().getName());
+
+            log.info("[NamedLock] [END] 락 해제 완료 - name={} thread={}", lockName, Thread.currentThread().getName());
         }
     }
 }
+
