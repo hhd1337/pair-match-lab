@@ -34,36 +34,56 @@ public class PairMatchServiceImpl implements PairMatchService {
 
     @Override
     public MatchResult match(Long missionId) {
+        log.info("[PAIR_MATCH] missionId={} 매칭 시작", missionId);
+
         Mission mission = missionRepository.findById(missionId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus.MISSION_NOT_FOUND));
 
         List<Crew> candidates = new ArrayList<>(crewRepository.findAllByMatchedFalse());
+        log.info("[PAIR_MATCH] missionId={} 현재 비매칭 크루 수={}", missionId, candidates.size());
+
         if (candidates.size() < 2) {
-            log.warn("[PAIR_MATCH] missionId={} 매칭 실패 - 남은 후보자 수 부족 (remainingCandidates={})", missionId,
-                    candidates.size());
+            log.warn(
+                    "[PAIR_MATCH] missionId={} 매칭 실패 - 남은 후보자 수 부족 (remainingCandidates={})",
+                    missionId,
+                    candidates.size()
+            );
             throw new GeneralException(ErrorStatus.MATCH_NOT_ENOUGH_CREW);
         }
 
         // 레이스 컨디션 확인용 인위적 지연
         try {
+            log.debug("[PAIR_MATCH] missionId={} 레이스 컨디션 테스트용 지연 시작 (3s)", missionId);
             Thread.sleep(3000); // 3초
+            log.debug("[PAIR_MATCH] missionId={} 레이스 컨디션 테스트용 지연 종료", missionId);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            log.warn("[PAIR_MATCH] missionId={} 지연 중 인터럽트 발생", missionId, e);
         }
 
         Collections.shuffle(candidates);
+        log.info(
+                "[PAIR_MATCH] missionId={} 후보 크루 셔플 완료 - firstCandidates={}",
+                missionId,
+                candidates.stream().limit(5).map(Crew::getName).toList()
+        );
 
         List<PairGroup> createdGroups = new ArrayList<>();
 
         int index = 0;
+        int groupSeq = 1;
         while (index < candidates.size() - 1) {
             int remaining = candidates.size() - index;
             int groupSize = decideGroupMemberNum(remaining);
 
             List<Crew> groupCrews = candidates.subList(index, index + groupSize);
 
-            // 이 레벨에서 과거에 이미 만난 조합이 하나라도 있으면 에러
+            log.info("[PAIR_MATCH] missionId={} 그룹 생성 시도 seq={} size={} crews={}", missionId, groupSeq, groupSize,
+                    groupCrews.stream().map(Crew::getName).toList());
+
             if (hasAnyPreviousPairingInLevel(mission.getLevel(), groupCrews)) {
+                log.warn("[PAIR_MATCH] missionId={} 그룹 seq={} 중복 페어 이력 발견 → 재매칭 필요 (level={}, crews={})", missionId,
+                        groupSeq, mission.getLevel(), groupCrews.stream().map(Crew::getId).toList());
                 throw new GeneralException(ErrorStatus.MATCH_DUPLICATED_PAIR_HISTORY);
             }
 
@@ -71,9 +91,16 @@ public class PairMatchServiceImpl implements PairMatchService {
             savePairMembers(pairGroup, groupCrews);
             savePairHistories(mission.getLevel(), groupCrews);
 
+            log.info("[PAIR_MATCH] missionId={} 그룹 확정 seq={} pairGroupId={} crews={}", missionId, groupSeq,
+                    pairGroup.getId(), groupCrews.stream().map(Crew::getId).toList());
+
             createdGroups.add(pairGroup);
             index += groupSize;
+            groupSeq++;
         }
+
+        log.info("[PAIR_MATCH] missionId={} 매칭 완료 - 총 그룹 수={}, 사용된 크루 수={}", missionId, createdGroups.size(),
+                createdGroups.stream().mapToInt(g -> g.getMembers().size()).sum());
 
         return MatchResult.builder()
                 .mission(mission)
